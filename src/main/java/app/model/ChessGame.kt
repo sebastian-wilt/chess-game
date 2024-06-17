@@ -1,10 +1,9 @@
 package app.model
 
-import app.controller.ChessApp
 import java.awt.Color
 
 
-class ChessGame(private val controller: ChessApp) {
+class ChessGame {
     private val positions: MutableMap<Position, Int> = emptyMap<Position, Int>().toMutableMap()
     var currentPosition: Position = Position()
     var moveCounter: Int = 1

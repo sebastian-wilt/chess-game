@@ -163,7 +163,7 @@ public class ChessView {
     }
 
     class ChessButton implements ActionListener {
-        int row, col;
+        final int row, col;
 
         public ChessButton(int i, int j) {
             row = i;

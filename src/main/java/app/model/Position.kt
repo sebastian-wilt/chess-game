@@ -20,11 +20,11 @@ class Position {
 
     constructor() {
         for (i in STARTING_ROW.indices) {
-            chessboard[0][i] = ChessPiece(STARTING_ROW[i], Color.BLACK);
-            chessboard[1][i] = ChessPiece(Piece.PAWN, Color.BLACK);
+            chessboard[0][i] = ChessPiece(STARTING_ROW[i], Color.BLACK)
+            chessboard[1][i] = ChessPiece(Piece.PAWN, Color.BLACK)
 
-            chessboard[6][i] = ChessPiece(Piece.PAWN, Color.WHITE);
-            chessboard[7][i] = ChessPiece(STARTING_ROW[i], Color.WHITE);
+            chessboard[6][i] = ChessPiece(Piece.PAWN, Color.WHITE)
+            chessboard[7][i] = ChessPiece(STARTING_ROW[i], Color.WHITE)
 
             for (j in (2..<6)) {
                 chessboard[j][i] = null
@@ -48,6 +48,7 @@ class Position {
     fun makeMove(from: Pair<Int, Int>, to: Pair<Int, Int>) {
         chessboard[to.first][to.second] = chessboard[from.first][from.second]
         chessboard[from.first][from.second] = null
+        chessboard[to.first][to.second]!!.move()
         chessboard.printReadable()
     }
 
