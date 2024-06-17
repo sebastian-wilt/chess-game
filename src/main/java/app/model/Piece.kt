@@ -1,4 +1,4 @@
-package app
+package app.model
 
 enum class Piece {
     ROOK,

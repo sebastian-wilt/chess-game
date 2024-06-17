@@ -1,4 +1,7 @@
-package app
+package app.controller
+
+import app.model.ChessGame
+import app.view.ChessView
 
 class ChessApp() {
     private val chessGame: ChessGame = ChessGame(this)

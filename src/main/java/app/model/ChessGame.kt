@@ -1,5 +1,6 @@
-package app
+package app.model
 
+import app.controller.ChessApp
 import java.awt.Color
 
 

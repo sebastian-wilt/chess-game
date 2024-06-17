@@ -1,5 +1,8 @@
-package app;
+package app.view;
 
+import app.controller.ChessApp;
+import app.model.GameState;
+import app.model.Position;
 import kotlin.Pair;
 
 import javax.imageio.ImageIO;
@@ -12,15 +15,11 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 
-class ChessView {
+public class ChessView {
     private final ChessApp controller;
     private JPanel mainPanel;
     private JLabel currentMoveColor;
     private final JButton[][] chessBoardSquares = new JButton[8][8];
-    private final Image[][] chessPieceImages = new Image[2][6];
-    private static final int KING = 0, QUEEN = 1, ROOK = 2, KNIGHT = 3, BISHOP = 4, PAWN = 5;
-    private static final int[] STARTING_ROW = {ROOK, KNIGHT, BISHOP, QUEEN, KING, BISHOP, KNIGHT, ROOK};
-    private static final int BLACK = 0, WHITE = 1;
     private final ImageIcon defaultIcon = new ImageIcon(new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB));
     private int counter = 0;
     private final int[] moveFrom = new int[2];
