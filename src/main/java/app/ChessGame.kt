@@ -1,24 +1,58 @@
 package app
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import java.awt.Color
 
 
 class ChessGame(private val controller: ChessApp) {
     private val positions: MutableMap<Position, Int> = emptyMap<Position, Int>().toMutableMap()
-    private val _currentPosition = MutableStateFlow(Position())
-    val currentPosition: StateFlow<Position> = _currentPosition.asStateFlow()
+    var currentPosition: Position = Position()
+    var moveCounter: Int = 1
+    var turnColor: Color = Color.WHITE
+    var gameState: GameState = GameState.RUNNING
 
 
     init {
-        positions[_currentPosition.value] = 1
+        positions[currentPosition] = 1
     }
 
     fun makeMove(from: Pair<Int, Int>, to: Pair<Int, Int>) {
-        val newPos = Position(_currentPosition.value)
+        if (gameState != GameState.RUNNING) {
+            return
+        }
+
+        val newPos = Position(currentPosition)
         newPos.makeMove(from, to)
-        _currentPosition.update { newPos }
+        println("From: $from -> $to")
+        currentPosition = newPos
+        updateCounterAndColor()
+        addAndCheckRepetition()
+    }
+
+    private fun updateCounterAndColor() {
+        if (turnColor == Color.BLACK) {
+            moveCounter++
+            turnColor = Color.WHITE
+        } else {
+            turnColor = Color.BLACK
+        }
+    }
+
+    private fun addAndCheckRepetition() {
+        val old = positions.getOrDefault(currentPosition, 0)
+        positions[currentPosition] = old + 1
+        println("New repetition counter: ${positions[currentPosition]}")
+        if (positions[currentPosition] == 3) {
+            gameState = GameState.DRAW
+        }
+        println("Gamestate: $gameState")
+    }
+
+    fun createNewGame() {
+        positions.clear()
+        currentPosition = Position()
+        positions[currentPosition] = 1
+        moveCounter = 1
+        turnColor = Color.WHITE
+        gameState = GameState.RUNNING
     }
 }

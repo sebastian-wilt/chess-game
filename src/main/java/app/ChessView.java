@@ -1,5 +1,7 @@
 package app;
 
+import kotlin.Pair;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -27,9 +29,10 @@ class ChessView {
 
     public ChessView(ChessApp controller) {
         this.controller = controller;
+        var pos = controller.getCurrentPosition();
         createImages();
         init();
-        loadPosition(new Position());
+        loadPosition(pos);
     }
 
     private void init() {
@@ -50,7 +53,11 @@ class ChessView {
         JPanel menuPanel = new JPanel(new GridLayout(1, 3));
 
         JButton newGame = new JButton("New game");
-        newGame.addActionListener((e) -> createNewGame());
+        newGame.addActionListener((e) -> {
+            controller.createNewGame();
+            loadPosition(controller.getCurrentPosition());
+            updateCounter(controller.getMoveCounter(), controller.getTurnColor());
+        });
 
         currentMoveColor = new JLabel("1", JLabel.CENTER);
         currentMoveColor.setOpaque(true);
@@ -106,16 +113,13 @@ class ChessView {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 var string = board[i][j] == null ? null : board[i][j].toString();
-                System.out.println(string);
                 var path = images.getOrDefault(string, null);
                 ImageIcon icon;
                 if (path != null) {
                     try {
                         var file = new File("./src/main/java/app/" + path);
                         icon = new ImageIcon(ImageIO.read(file));
-                        System.out.println("Fetching" + path);
                     } catch (Exception e) {
-                        System.out.println(e.getMessage());
                         icon = null;
                     }
                 } else {
@@ -127,52 +131,36 @@ class ChessView {
         }
     }
 
-    private void createNewGame() {
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                chessBoardSquares[i][j].setIcon(defaultIcon);
-            }
-        }
-
-        for (int i = 0; i < STARTING_ROW.length; i++) {
-            chessBoardSquares[0][i].setIcon(new ImageIcon(chessPieceImages[BLACK][STARTING_ROW[i]]));
-            chessBoardSquares[1][i].setIcon(new ImageIcon(chessPieceImages[BLACK][PAWN]));
-
-            chessBoardSquares[6][i].setIcon(new ImageIcon(chessPieceImages[WHITE][PAWN]));
-            chessBoardSquares[7][i].setIcon(new ImageIcon(chessPieceImages[WHITE][STARTING_ROW[i]]));
-        }
-
-        currentMoveColor.setText("1");
-        currentMoveColor.setBackground(Color.WHITE);
-        currentMoveColor.setForeground(Color.BLACK);
-
-        // controller.createNewGame();
-    }
-
     private void makeMove() {
-//        JButton from = chessBoardSquares[moveFrom[0]][moveFrom[1]];
-//        JButton to = chessBoardSquares[moveTo[0]][moveTo[1]];
-//
-//        counter = 0;
-//        if (!controller.validMove(moveFrom, moveTo)) {
-//            return;
-//        }
-//
-//        to.setIcon(from.getIcon());
-//        from.setIcon(defaultIcon);
-//
-//        controller.makeMove(moveFrom, moveTo);
+        counter = 0;
+        controller.makeMove(new Pair<>(moveFrom[0], moveFrom[1]), new Pair<>(moveTo[0], moveTo[1]));
+        update();
     }
 
-    public void endGame(String result, String message) {
+    private void update() {
+        loadPosition(controller.getCurrentPosition());
+        updateCounter(controller.getMoveCounter(), controller.getTurnColor());
+
+        var gameState = controller.getGameState();
+        switch (gameState) {
+            case BLACK, WHITE, DRAW -> endGame(gameState);
+        }
+    }
+
+    public void endGame(GameState state) {
+        String message = "";
+        switch (state) {
+            case BLACK -> message = "Black won";
+            case WHITE -> message = "White won";
+            case DRAW -> message = "Draw";
+        }
         currentMoveColor.setText(message);
     }
 
-    public void updateCounter(int counter) {
-        currentMoveColor.setText(String.valueOf(counter / 2));
-        Color bg = (counter & 1) == 1 ? Color.BLACK : Color.WHITE;
-        currentMoveColor.setBackground(bg);
-        currentMoveColor.setForeground(bg == Color.BLACK ? Color.WHITE : Color.BLACK);
+    public void updateCounter(int counter, Color turnColor) {
+        currentMoveColor.setText(String.valueOf(counter));
+        currentMoveColor.setBackground(turnColor);
+        currentMoveColor.setForeground(turnColor == Color.BLACK ? Color.WHITE : Color.BLACK);
     }
 
     class ChessButton implements ActionListener {

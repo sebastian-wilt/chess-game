@@ -32,10 +32,33 @@ class Position {
         }
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (other !is Position) return false
+
+        for (i in 0..<8) {
+            for (j in 0..<8) {
+                if (other.chessboard[i][j] != chessboard[i][j]) return false
+            }
+        }
+
+        return true
+    }
+
+
     fun makeMove(from: Pair<Int, Int>, to: Pair<Int, Int>) {
         chessboard[to.first][to.second] = chessboard[from.first][from.second]
-        chessboard[from.first][to.first] = null
+        chessboard[from.first][from.second] = null
+        chessboard.printReadable()
     }
 
     fun getChessBoard() = chessboard
+
+    override fun hashCode(): Int {
+        return chessboard.contentDeepHashCode()
+    }
+}
+
+fun Array<Array<ChessPiece?>>.printReadable() {
+    (0..2).forEach { _ -> println() }
+    this.forEach { row -> println(row.contentToString()) }
 }
