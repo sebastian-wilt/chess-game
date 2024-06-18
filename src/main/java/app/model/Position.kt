@@ -116,6 +116,17 @@ class Position {
     }
 
     private fun findKingMoves(row: Int, col: Int, ignoreCheck: Boolean = false) {
+        for (i in (-1..1)) {
+            for (j in (-1..1)) {
+                if (i == 0 && j == 0) {
+                    continue
+                }
+
+                if ((row + i) in (0..7) && (col + j) in (0..7) && chessboard[row + i][col + j]?.color != turnColor) {
+                    checkLegalMove(Pair(row, col), Pair(row + i, col + j), ignoreCheck)
+                }
+            }
+        }
     }
 
     private fun findBishopMoves(row: Int, col: Int, ignoreCheck: Boolean = false) {
