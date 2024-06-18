@@ -1,6 +1,7 @@
 package app.model
 
 import java.awt.Color
+import kotlin.math.abs
 
 val STARTING_ROW =
     listOf(Piece.ROOK, Piece.KNIGHT, Piece.BISHOP, Piece.QUEEN, Piece.KING, Piece.BISHOP, Piece.KNIGHT, Piece.ROOK)
@@ -10,8 +11,6 @@ class Position {
     private var turnColor: Color
     private val possibleMoves: MutableList<Pair<Pair<Int, Int>, Pair<Int, Int>>> = mutableListOf()
     var isCheck: Boolean = false
-
-    private var hasFoundMoves: Boolean = false
 
     constructor(position: Position, findMoves: Boolean = true) {
         for (i in 0..<8) {
@@ -112,7 +111,23 @@ class Position {
     }
 
     private fun findKnightMoves(row: Int, col: Int, ignoreCheck: Boolean = false) {
+        for (i in -2..2) {
+            for (j in -2..2) {
+                if (!(abs(i) == 1 && abs(j) == 2 || abs(i) == 2 && abs(j) == 1)) {
+                    continue
+                }
 
+                if ((row + i) !in (0..7) || (col + j) !in (0..7)) {
+                    continue
+                }
+
+                if (chessboard[row + i][col + j]?.color == turnColor) {
+                    continue
+                }
+
+                checkLegalMove(Pair(row, col), Pair(row + i, col + j), ignoreCheck)
+            }
+        }
     }
 
     private fun findKingMoves(row: Int, col: Int, ignoreCheck: Boolean = false) {
