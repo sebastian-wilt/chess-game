@@ -9,6 +9,7 @@ class ChessGame {
     var moveCounter: Int = 1
     var turnColor: Color = Color.WHITE
     var gameState: GameState = GameState.RUNNING
+    private var newPos: Position? = null
 
 
     init {
@@ -20,12 +21,30 @@ class ChessGame {
             return
         }
 
-        val newPos = Position(currentPosition)
-        newPos.makeMove(from, to)
-        println("From: $from -> $to")
-        currentPosition = newPos
-        updateCounterAndColor()
-        addAndCheckRepetition()
+        if (newPos == null) {
+            newPos = Position(currentPosition)
+        }
+
+        if (newPos!!.checkValidMove(from, to)) {
+            println("Valid move: $from -> $to")
+            newPos!!.makeMove(from, to)
+            println("From: $from -> $to")
+            currentPosition = newPos!!
+            newPos = null
+            updateCounterAndColor()
+            addAndCheckRepetition()
+            checkForCheckMate()
+            return
+        }
+
+        println("Invalid move: $from -> $to")
+    }
+
+    private fun checkForCheckMate() {
+        val pos = Position(currentPosition)
+        if (pos.isCheck) {
+            gameState = if (turnColor == Color.WHITE) GameState.BLACK else GameState.WHITE
+        }
     }
 
     private fun updateCounterAndColor() {
@@ -50,6 +69,7 @@ class ChessGame {
     fun createNewGame() {
         positions.clear()
         currentPosition = Position()
+        newPos = null
         positions[currentPosition] = 1
         moveCounter = 1
         turnColor = Color.WHITE
