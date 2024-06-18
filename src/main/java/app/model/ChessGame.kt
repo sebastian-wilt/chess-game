@@ -4,12 +4,13 @@ import java.awt.Color
 
 
 class ChessGame {
-    private val positions: MutableMap<Position, Int> = emptyMap<Position, Int>().toMutableMap()
+    private val positions: MutableMap<Position, Int> = mutableMapOf()
     var currentPosition: Position = Position()
     var moveCounter: Int = 1
     var turnColor: Color = Color.WHITE
     var gameState: GameState = GameState.RUNNING
     private var newPos: Position? = null
+    private var lastMove: Pair<Pair<Int, Int>, Pair<Int, Int>>? = null
 
 
     init {
@@ -22,7 +23,7 @@ class ChessGame {
         }
 
         if (newPos == null) {
-            newPos = Position(currentPosition)
+            newPos = Position(currentPosition, lastMove)
         }
 
         if (newPos!!.checkValidMove(from, to)) {
@@ -31,6 +32,7 @@ class ChessGame {
             println("From: $from -> $to")
             currentPosition = newPos!!
             newPos = null
+            lastMove = Pair(from, to)
             updateCounterAndColor()
             addAndCheckRepetition()
             checkForCheckMate()
@@ -41,7 +43,7 @@ class ChessGame {
     }
 
     private fun checkForCheckMate() {
-        val pos = Position(currentPosition)
+        val pos = Position(currentPosition, lastMove = null)
         if (pos.isCheck) {
             gameState = if (turnColor == Color.WHITE) GameState.BLACK else GameState.WHITE
         }
@@ -70,6 +72,7 @@ class ChessGame {
         positions.clear()
         currentPosition = Position()
         newPos = null
+        lastMove = null
         positions[currentPosition] = 1
         moveCounter = 1
         turnColor = Color.WHITE

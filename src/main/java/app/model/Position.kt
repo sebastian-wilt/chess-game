@@ -10,10 +10,11 @@ val STARTING_ROW =
 class Position {
     private val chessboard: Array<Array<ChessPiece?>> = Array(size = 8, init = { Array(size = 8, init = { null }) })
     private var turnColor: Color
+    private val lastMove: Pair<Pair<Int, Int>, Pair<Int, Int>>?
     private val possibleMoves: MutableList<Pair<Pair<Int, Int>, Pair<Int, Int>>> = mutableListOf()
     var isCheck: Boolean = false
 
-    constructor(position: Position, findMoves: Boolean = true) {
+    constructor(position: Position, lastMove: Pair<Pair<Int, Int>, Pair<Int, Int>>?, findMoves: Boolean = true) {
         for (i in 0..<8) {
             for (j in 0..<8) {
                 chessboard[i][j] =
@@ -22,6 +23,7 @@ class Position {
         }
 
         turnColor = position.turnColor
+        this.lastMove = lastMove
 
         if (findMoves) {
             findPossibleMoves()
@@ -45,6 +47,7 @@ class Position {
         }
 
         turnColor = Color.WHITE
+        lastMove = null
     }
 
     private fun changeTurn() {
@@ -66,9 +69,24 @@ class Position {
     fun checkValidMove(from: Pair<Int, Int>, to: Pair<Int, Int>) = (Pair(from, to) in possibleMoves)
 
     fun makeMove(from: Pair<Int, Int>, to: Pair<Int, Int>, simulation: Boolean = false) {
+
+        val isPawnMoveToEmpty =
+            chessboard[from.first][from.second]?.type == Piece.PAWN && chessboard[to.first][to.second] == null
+
+        val isDiagonalMove =
+            abs(to.first - from.first) == 1 && abs(to.second - from.second) == 1
+
+        val isEnPassant = isPawnMoveToEmpty && isDiagonalMove
+
+        if (isEnPassant) {
+            val direction = if (turnColor == Color.WHITE) -1 else 1
+            chessboard[to.first - direction][to.second] = null
+        }
+
         chessboard[to.first][to.second] = chessboard[from.first][from.second]
         chessboard[from.first][from.second] = null
-        chessboard[to.first][to.second]!!.move()
+        chessboard[to.first][to.second]?.move()
+
 
         if (!simulation) {
             chessboard.printReadable()
@@ -307,6 +325,24 @@ class Position {
                 checkLegalMove(Pair(row, col), Pair(row + direction, col + 1), ignoreCheck)
             }
         }
+
+
+        val lastFrom = lastMove?.first ?: return
+        val lastTo = lastMove.second
+
+        println("\n\nLast Move: $lastFrom -> $lastTo")
+
+        if (abs(lastTo.first - lastFrom.first) == 2 && chessboard[lastTo.first][lastTo.second]?.type == Piece.PAWN) {
+            // Left
+            if (row == lastTo.first && col == lastTo.second - 1) {
+                checkLegalMove(Pair(row, col), Pair(row + direction, col + 1), ignoreCheck)
+            }
+
+            // Right
+            if (row == lastTo.first && col == lastTo.second + 1) {
+                checkLegalMove(Pair(row, col), Pair(row + direction, col - 1), ignoreCheck)
+            }
+        }
     }
 
     private fun checkLegalMove(
@@ -330,7 +366,7 @@ class Position {
         if (printDebug) {
             println("Simulating move: $from -> $to")
         }
-        val pos = Position(this, findMoves = false)
+        val pos = Position(this, lastMove = null, findMoves = false)
         pos.makeMove(from, to, true)
         pos.findPossibleMoves(ignoreCheck = true)
         return !pos.isCheck
