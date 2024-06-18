@@ -175,56 +175,52 @@ class Position {
         val opposition = if (turnColor == Color.WHITE) Color.BLACK else Color.WHITE
 
         for (i in (1..7)) {
-            if ((row + i) < 8 && (col + i) < 8 && chessboard[row + i][col + i]?.color != turnColor) {
+            val isValidSquare = ((row + i) < 8 && (col + i) < 8)
+            val isValidTarget = isValidSquare && chessboard[row + i][col + i]?.color != turnColor
+            if (isValidTarget) {
                 checkLegalMove(Pair(row, col), Pair(row + i, col + i), ignoreCheck)
 
-                if (chessboard[row + i][col + i]?.color == opposition) {
-                    break
-                }
-
-                continue
+                val isOpposition = chessboard[row + i][col + i]?.color == opposition
+                if (isOpposition) break else continue
             }
 
             break
         }
 
         for (i in (1..7)) {
-            if ((row - i) >= 0 && (col - i) >= 0 && chessboard[row - i][col - i]?.color != turnColor) {
+            val isValidSquare = ((row - i) >= 0 && (col - i) >= 0)
+            val isValidTarget = isValidSquare && chessboard[row - i][col - i]?.color != turnColor
+            if (isValidTarget) {
                 checkLegalMove(Pair(row, col), Pair(row - i, col - i), ignoreCheck)
 
-                if (chessboard[row - i][col - i]?.color == opposition) {
-                    break
-                }
-
-                continue
+                val isOpposition = chessboard[row - i][col - i]?.color == opposition
+                if (isOpposition) break else continue
             }
 
             break
         }
 
         for (i in (1..7)) {
-            if ((row - i) >= 0 && (col + i) < 8 && chessboard[row - i][col + i]?.color != turnColor) {
+            val isValidSquare = ((row - i) >= 0 && (col + i) < 8)
+            val isValidTarget = isValidSquare && chessboard[row - i][col + i]?.color != turnColor
+            if (isValidTarget) {
                 checkLegalMove(Pair(row, col), Pair(row - i, col + i), ignoreCheck)
 
-                if (chessboard[row - i][col + i]?.color == opposition) {
-                    break
-                }
-
-                continue
+                val isOpposition = chessboard[row - i][col + i]?.color == opposition
+                if (isOpposition) break else continue
             }
 
             break
         }
 
         for (i in (1..7)) {
-            if ((row + i) < 8 && (col - i) >= 0 && chessboard[row + i][col - i]?.color != turnColor) {
+            val isValidSquare = ((row + i) < 8 && (col - i) >= 0)
+            val isValidTarget = isValidSquare && chessboard[row + i][col - i]?.color != turnColor
+            if (isValidTarget) {
                 checkLegalMove(Pair(row, col), Pair(row + i, col - i), ignoreCheck)
 
-                if (chessboard[row + i][col - i]?.color == opposition) {
-                    break
-                }
-
-                continue
+                val isOpposition = chessboard[row + i][col - i]?.color == opposition
+                if (isOpposition) break else continue
             }
             break
         }
@@ -237,57 +233,57 @@ class Position {
 
         val opposition = if (turnColor == Color.WHITE) Color.BLACK else Color.WHITE
 
+        // Move down
         for (i in (1..7)) {
-            if ((row + i) < 8 && chessboard[row + i][col]?.color != turnColor) {
+            val isValidSquare = (row + i) < 8
+            val isValidTarget = isValidSquare && chessboard[row + i][col]?.color != turnColor
+            if (isValidTarget) {
                 checkLegalMove(Pair(row, col), Pair(row + i, col), ignoreCheck)
 
-                if (chessboard[row + i][col]?.color == opposition) {
-                    break
-                }
-
-                continue
+                val isOpposition = chessboard[row + i][col]?.color == opposition
+                if (isOpposition) break else continue
             }
 
             break
         }
 
+        // Move up
         for (i in (1..7)) {
-            if ((row - i) >= 0 && chessboard[row - i][col]?.color != turnColor) {
+            val isValidSquare = (row - i) >= 0
+            val isValidTarget = isValidSquare && chessboard[row - i][col]?.color != turnColor
+            if (isValidTarget) {
                 checkLegalMove(Pair(row, col), Pair(row - i, col), ignoreCheck)
 
-                if (chessboard[row - i][col]?.color == opposition) {
-                    break
-                }
-
-                continue
+                val isOpposition = chessboard[row - i][col]?.color == opposition
+                if (isOpposition) break else continue
             }
 
             break
         }
 
+        // Move right
         for (i in (1..7)) {
-            if ((col + i) < 8 && chessboard[row][col + i]?.color != turnColor) {
+            val isValidSquare = (col + i) < 8
+            val isValidTarget = isValidSquare && chessboard[row][col + i]?.color != turnColor
+            if (isValidTarget) {
                 checkLegalMove(Pair(row, col), Pair(row, col + i), ignoreCheck)
 
-                if (chessboard[row][col + i]?.color == opposition) {
-                    break
-                }
-
-                continue
+                val isOpposition = chessboard[row][col + i]?.color == opposition
+                if (isOpposition) break else continue
             }
 
             break
         }
 
+        // Move left
         for (i in (1..7)) {
-            if ((col - i) >= 0 && chessboard[row][col - i]?.color != turnColor) {
+            val isValidSquare = (col - i) >= 0
+            val isValidTarget = isValidSquare && chessboard[row][col - i]?.color != turnColor
+            if (isValidTarget) {
                 checkLegalMove(Pair(row, col), Pair(row, col - i), ignoreCheck)
 
-                if (chessboard[row][col - i]?.color == opposition) {
-                    break
-                }
-
-                continue
+                val isOpposition = chessboard[row][col - i]?.color == opposition
+                if (isOpposition) break else continue
             }
 
             break
