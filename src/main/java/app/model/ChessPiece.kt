@@ -3,9 +3,9 @@ package app.model
 import java.awt.Color
 
 class ChessPiece {
-    private val type: Piece
+    val type: Piece
+    val color: Color
     private var hasMoved = false
-    private val color: Color
 
     constructor(type: Piece, color: Color) {
         this.type = type
