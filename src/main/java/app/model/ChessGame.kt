@@ -1,6 +1,7 @@
 package app.model
 
 import java.awt.Color
+import kotlin.math.max
 
 
 class ChessGame {
@@ -11,6 +12,8 @@ class ChessGame {
     var gameState: GameState = GameState.RUNNING
     private var newPos: Position? = null
     private var lastMove: Pair<Pair<Int, Int>, Pair<Int, Int>>? = null
+    private var lastCapture: Int = 0
+    private var lastPawnMove: Int = 0
 
 
     init {
@@ -27,6 +30,17 @@ class ChessGame {
         }
 
         if (newPos!!.checkValidMove(from, to)) {
+            val pawnMoved = newPos?.getChessBoard()!![from.first][from.second]?.type == Piece.PAWN
+            val pieceCaptured = newPos?.getChessBoard()!![to.first][to.second] != null
+
+            if (pawnMoved) {
+                lastPawnMove = moveCounter
+            }
+
+            if (pieceCaptured) {
+                lastCapture = moveCounter
+            }
+
             println("Valid move: $from -> $to")
             newPos!!.makeMove(from, to)
             println("From: $from -> $to")
@@ -36,6 +50,7 @@ class ChessGame {
             updateCounterAndColor()
             addAndCheckRepetition()
             checkForCheckMate()
+            checkFiftyMoveRule()
             return
         }
 
@@ -68,6 +83,12 @@ class ChessGame {
         println("Gamestate: $gameState")
     }
 
+    private fun checkFiftyMoveRule() {
+        if (moveCounter - max(lastPawnMove, lastCapture) >= 50) {
+            gameState = GameState.DRAW
+        }
+    }
+
     fun createNewGame() {
         positions.clear()
         currentPosition = Position()
@@ -77,5 +98,7 @@ class ChessGame {
         moveCounter = 1
         turnColor = Color.WHITE
         gameState = GameState.RUNNING
+        lastCapture = 0
+        lastPawnMove = 0
     }
 }
