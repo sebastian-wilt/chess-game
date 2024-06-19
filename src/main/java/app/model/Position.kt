@@ -83,6 +83,19 @@ class Position {
             chessboard[to.first - direction][to.second] = null
         }
 
+        val isLongKingMove = chessboard[from.first][from.second]?.type == Piece.KING && abs(to.second - from.second) > 1
+
+        if (isLongKingMove) {
+            val isShortCastle = to.second == 6
+            if (isShortCastle) {
+                chessboard[from.first][to.second - 1] = chessboard[from.first][to.second + 1]
+                chessboard[from.first][to.second + 1] = null
+            } else {
+                chessboard[from.first][to.second + 1] = chessboard[from.first][to.second - 2]
+                chessboard[from.first][to.second - 2] = null
+            }
+        }
+
         chessboard[to.first][to.second] = chessboard[from.first][from.second]
         chessboard[from.first][from.second] = null
         chessboard[to.first][to.second]?.move()
@@ -165,6 +178,36 @@ class Position {
                 }
             }
         }
+
+        // Castling
+
+        if (chessboard[row][col]!!.hasMoved()) {
+            return
+        }
+
+        val rightSquaresEmpty = chessboard[row][col + 1] == null && chessboard[row][col + 2] == null
+        val rightRookValid =
+            chessboard[row][col + 3]?.type == Piece.ROOK && chessboard[row][col + 3]?.color == turnColor && chessboard[row][col + 3]?.hasMoved() == false
+
+        val from = Pair(row, col)
+
+        if (rightSquaresEmpty && rightRookValid) {
+            if (simulateMove(from, Pair(row, col + 1)) && simulateMove(from, Pair(row, col + 2))) {
+                possibleMoves.add(Pair(from, Pair(row, col + 2)))
+            }
+        }
+
+        val leftSquaresEmpty =
+            chessboard[row][col - 1] == null && chessboard[row][col - 2] == null && chessboard[row][col - 3] == null
+        val leftRookValid =
+            chessboard[row][col - 4]?.type == Piece.ROOK && chessboard[row][col - 4]?.color == turnColor && chessboard[row][col - 4]?.hasMoved() == false
+
+        if (leftRookValid && leftSquaresEmpty) {
+            if (simulateMove(from, Pair(row, col - 1)) && simulateMove(from, Pair(row, col - 2))) {
+                possibleMoves.add(Pair(from, Pair(row, col - 2)))
+            }
+        }
+
     }
 
     private fun findBishopMoves(row: Int, col: Int, ignoreCheck: Boolean = false) {
