@@ -114,6 +114,7 @@ class Position {
         return chessboard.contentDeepHashCode()
     }
 
+    @Suppress("SameParameterValue")
     private fun findPossibleMoves(ignoreCheck: Boolean = false) {
         for (i in 0..<8) {
             for (j in 0..<8) {
