@@ -6,11 +6,10 @@ plugins {
 }
 
 group = "app"
+
 version = "1.0-SNAPSHOT"
 
-repositories {
-    mavenCentral()
-}
+repositories { mavenCentral() }
 
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
@@ -18,15 +17,11 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0-RC")
-
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
+tasks.test { useJUnitPlatform() }
 
 tasks.withType<KotlinCompile> {}
 
-kotlin {
-    jvmToolchain(17)
-}
+kotlin { jvmToolchain(17) }
+
