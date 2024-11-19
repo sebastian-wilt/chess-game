@@ -14,7 +14,7 @@ With Makefile and kotlin:
 
 ```sh
 make run
-```sh 
+```
 
 ## TODO:
 
