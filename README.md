@@ -11,9 +11,10 @@ kotlin -cp build/libs/Chess-1.0-SNAPSHOT.jar app.Main
 ```
 
 With Makefile and kotlin:
-'''sh 
+
+```sh
 make run
-'''
+```sh 
 
 ## TODO:
 
