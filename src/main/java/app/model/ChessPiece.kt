@@ -12,6 +12,7 @@ class ChessPiece {
         this.color = color
     }
 
+    // Copy constructor
     constructor(other: ChessPiece) {
         type = other.type
         hasMoved = other.hasMoved
@@ -21,6 +22,8 @@ class ChessPiece {
     override fun toString(): String {
         return "${if (color == Color.BLACK) "BLACK" else "WHITE"}_${type}"
     }
+
+    // Override equals and hashcode for use in hashmap
 
     override fun equals(other: Any?): Boolean {
         if (other !is ChessPiece) {

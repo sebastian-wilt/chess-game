@@ -14,6 +14,7 @@ class Position {
     private val possibleMoves: MutableList<Pair<Pair<Int, Int>, Pair<Int, Int>>> = mutableListOf()
     var isCheck: Boolean = false
 
+    // Create new position from previous position
     constructor(position: Position, lastMove: Pair<Pair<Int, Int>, Pair<Int, Int>>?, findMoves: Boolean = true) {
         for (i in 0..<8) {
             for (j in 0..<8) {
@@ -33,6 +34,7 @@ class Position {
         }
     }
 
+    // Create default starting position
     constructor() {
         for (i in STARTING_ROW.indices) {
             chessboard[0][i] = ChessPiece(STARTING_ROW[i], Color.BLACK)
@@ -54,6 +56,8 @@ class Position {
         turnColor = if (turnColor == Color.WHITE) Color.BLACK else Color.WHITE
     }
 
+    // Override equals and hashCode for use in hashmap
+
     override fun equals(other: Any?): Boolean {
         if (other !is Position) return false
 
@@ -66,8 +70,14 @@ class Position {
         return true
     }
 
+    override fun hashCode(): Int {
+        return chessboard.contentDeepHashCode()
+    }
+
     fun checkValidMove(from: Pair<Int, Int>, to: Pair<Int, Int>) = (Pair(from, to) in possibleMoves)
 
+    // Move must be legal
+    // use checkValidMove first
     fun makeMove(from: Pair<Int, Int>, to: Pair<Int, Int>, simulation: Boolean = false) {
 
         val isPawnMoveToEmpty =
@@ -83,10 +93,13 @@ class Position {
             chessboard[to.first - direction][to.second] = null
         }
 
+        // Also known as castling, but alas
         val isLongKingMove = chessboard[from.first][from.second]?.type == Piece.KING && abs(to.second - from.second) > 1
 
         if (isLongKingMove) {
             val isShortCastle = to.second == 6
+
+            // Also move rook as castling moves both king and rook
             if (isShortCastle) {
                 chessboard[from.first][to.second - 1] = chessboard[from.first][to.second + 1]
                 chessboard[from.first][to.second + 1] = null
@@ -110,10 +123,11 @@ class Position {
 
     fun getChessBoard() = chessboard
 
-    override fun hashCode(): Int {
-        return chessboard.contentDeepHashCode()
-    }
 
+    // Find all legal moves for position
+    //
+    // ignoreCheck used for simulation to check if move would put player themself in check
+    // useful for not allowing move where king would move into check by pinned piece
     private fun findPossibleMoves(ignoreCheck: Boolean = false) {
         for (i in 0..<8) {
             for (j in 0..<8) {
@@ -145,6 +159,7 @@ class Position {
     private fun findKnightMoves(row: Int, col: Int, ignoreCheck: Boolean = false) {
         for (i in -2..2) {
             for (j in -2..2) {
+                // Only consider squares that knight can move to (2 + 1)
                 if (!(abs(i) == 1 && abs(j) == 2 || abs(i) == 2 && abs(j) == 1)) {
                     continue
                 }
@@ -192,6 +207,7 @@ class Position {
         val from = Pair(row, col)
 
         if (rightSquaresEmpty && rightRookValid) {
+            // Need to check both 1 and 2 squares right as it is not legal to castle through check
             if (simulateMove(from, Pair(row, col + 1)) && simulateMove(from, Pair(row, col + 2))) {
                 possibleMoves.add(Pair(from, Pair(row, col + 2)))
             }
@@ -203,6 +219,7 @@ class Position {
             chessboard[row][col - 4]?.type == Piece.ROOK && chessboard[row][col - 4]?.color == turnColor && chessboard[row][col - 4]?.hasMoved() == false
 
         if (leftRookValid && leftSquaresEmpty) {
+            // Need to check both 1 and 2 squares left as it is not legal to castle through check
             if (simulateMove(from, Pair(row, col - 1)) && simulateMove(from, Pair(row, col - 2))) {
                 possibleMoves.add(Pair(from, Pair(row, col - 2)))
             }
@@ -217,6 +234,7 @@ class Position {
 
         val opposition = if (turnColor == Color.WHITE) Color.BLACK else Color.WHITE
 
+        // Move down right
         for (i in (1..7)) {
             val isValidSquare = ((row + i) < 8 && (col + i) < 8)
             val isValidTarget = isValidSquare && chessboard[row + i][col + i]?.color != turnColor
@@ -230,6 +248,7 @@ class Position {
             break
         }
 
+        // Move up left
         for (i in (1..7)) {
             val isValidSquare = ((row - i) >= 0 && (col - i) >= 0)
             val isValidTarget = isValidSquare && chessboard[row - i][col - i]?.color != turnColor
@@ -243,6 +262,7 @@ class Position {
             break
         }
 
+        // Move up right
         for (i in (1..7)) {
             val isValidSquare = ((row - i) >= 0 && (col + i) < 8)
             val isValidTarget = isValidSquare && chessboard[row - i][col + i]?.color != turnColor
@@ -256,6 +276,7 @@ class Position {
             break
         }
 
+        // Move down left
         for (i in (1..7)) {
             val isValidSquare = ((row + i) < 8 && (col - i) >= 0)
             val isValidTarget = isValidSquare && chessboard[row + i][col - i]?.color != turnColor
@@ -371,6 +392,7 @@ class Position {
 
         println("\n\nLast Move: $lastFrom -> $lastTo")
 
+        // Check en passant
         if (abs(lastTo.first - lastFrom.first) == 2 && chessboard[lastTo.first][lastTo.second]?.type == Piece.PAWN) {
             // Left
             if (row == lastTo.first && col == lastTo.second - 1) {
@@ -384,6 +406,8 @@ class Position {
         }
     }
 
+    // Check if move is legal
+    // Add to list of possible moves if legal and not simulation (ignoreCheck)
     private fun checkLegalMove(
         from: Pair<Int, Int>,
         to: Pair<Int, Int>,
@@ -401,6 +425,8 @@ class Position {
         }
     }
 
+    // Check if move would put own king in check
+    // Returns true if legal move
     private fun simulateMove(from: Pair<Int, Int>, to: Pair<Int, Int>): Boolean {
         if (printDebug) {
             println("Simulating move: $from -> $to")
