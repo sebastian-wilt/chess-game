@@ -63,7 +63,7 @@ public class Stockfish {
             output.flush();
 
             // Give time to think
-            Thread.sleep(2000);
+            Thread.sleep(3000);
             output.write("stop\n");
             output.flush();
 

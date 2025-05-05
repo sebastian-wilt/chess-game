@@ -1,7 +1,11 @@
 package app.model
 
+import app.stockfish.Stockfish
+
 import java.awt.Color
 import kotlin.math.max
+
+const val squares: String = "abcdefgh"
 
 
 class ChessGame {
@@ -15,6 +19,8 @@ class ChessGame {
     private var lastCapture: Int = 0
     private var lastPawnMove: Int = 0
 
+    private val moves: MutableList<String> = mutableListOf()
+    private val stockfish: Stockfish = Stockfish("./stockfish-avx2")
 
     init {
         positions[currentPosition] = 1
@@ -41,6 +47,7 @@ class ChessGame {
                 lastCapture = moveCounter
             }
 
+            // Model
             println("Valid move: $from -> $to")
             newPos!!.makeMove(from, to)
             println("From: $from -> $to")
@@ -51,11 +58,18 @@ class ChessGame {
             addAndCheckRepetition()
             checkForCheckMate()
             checkFiftyMoveRule()
+
+            // Stockfish
+            moves.add(toLongAlgebricNotation(from, to))
+            val move = stockfish.getMove(moves.joinToString(separator = " "))
+            val nextMove = fromLongAlgebraicNotation(move)
+            this.makeMove(nextMove.first, nextMove.second)
             return
         }
 
         println("Invalid move: $from -> $to")
     }
+
 
     private fun checkForCheckMate() {
         val pos = Position(currentPosition, lastMove = null)
@@ -88,6 +102,28 @@ class ChessGame {
             gameState = GameState.DRAW
         }
     }
+
+    private fun toLongAlgebricNotation(from: Pair<Int, Int>, to: Pair<Int, Int>): String {
+        var src = squares[from.second] + (8 - from.first).toString()
+        var dest = squares[to.second] + (8 - to.first).toString()
+        println("From: $from -> $to")
+        println("Move: $src$dest")
+        return "$src$dest"
+    }
+    
+    private fun fromLongAlgebraicNotation(move: String): Pair<Pair<Int, Int>, Pair<Int, Int>> {
+        val fromCol = squares.indexOf(move[0])
+        val fromRow = 8 - move[1].toString().toInt()
+        val from = Pair(fromRow, fromCol)
+        val toCol = squares.indexOf(move[2])
+        val toRow = 8 - move[3].toString().toInt()
+        val to = Pair(toRow, toCol)
+
+        println("From: $from -> $to")
+
+        return Pair(from, to)
+    }
+
 
     fun createNewGame() {
         positions.clear()
