@@ -46,6 +46,8 @@ public class ChessView {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+
+        createUpdateThread();
     }
 
     private void createMenu() {
@@ -132,7 +134,7 @@ public class ChessView {
 
     private void makeMove() {
         counter = 0;
-        controller.makeMove(new Pair<>(moveFrom[0], moveFrom[1]), new Pair<>(moveTo[0], moveTo[1]));
+        new MoveThread(new Pair<>(moveFrom[0], moveFrom[1]), new Pair<>(moveTo[0], moveTo[1])).execute();
         update();
     }
 
@@ -160,6 +162,10 @@ public class ChessView {
         currentMoveColor.setText(String.valueOf(counter));
         currentMoveColor.setBackground(turnColor);
         currentMoveColor.setForeground(turnColor == Color.BLACK ? Color.WHITE : Color.BLACK);
+    }
+
+    private void createUpdateThread() {
+        new UpdateThread().execute();
     }
 
     class ChessButton implements ActionListener {
@@ -190,4 +196,40 @@ public class ChessView {
             }
         }
     }
+
+    // Thread triggering update every second
+    class UpdateThread extends SwingWorker {
+        protected Object doInBackground() {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        protected void done() {
+            System.out.println("Update thread done");
+            update();
+            createUpdateThread();
+        }
+    }
+
+    // Thread for making moves
+    // Much processing, especially if playing against stockfish
+    // So needs own thread
+    class MoveThread extends SwingWorker {
+        private Pair<Integer, Integer> from, to;
+
+        MoveThread(Pair<Integer, Integer> from, Pair<Integer, Integer> to) {
+            this.from = from;
+            this.to = to;
+        }
+
+        protected Object doInBackground() {
+            controller.makeMove(from, to);
+            return null;
+        }
+    }
+
 }
