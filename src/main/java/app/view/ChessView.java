@@ -3,6 +3,7 @@ package app.view;
 import app.controller.ChessApp;
 import app.model.GameState;
 import app.model.Position;
+import app.model.GameMode;
 import kotlin.Pair;
 
 import javax.imageio.ImageIO;
@@ -53,11 +54,18 @@ public class ChessView {
     private void createMenu() {
         JPanel menuPanel = new JPanel(new GridLayout(1, 3));
 
+        var gamePanel = new JFrame();
+        createGameMenu(gamePanel);
+        gamePanel.setAlwaysOnTop(true);
+        gamePanel.pack();
+        gamePanel.setLocationRelativeTo(null);
+
         JButton newGame = new JButton("New game");
         newGame.addActionListener((e) -> {
-            controller.createNewGame();
-            loadPosition(controller.getCurrentPosition());
-            updateCounter(controller.getMoveCounter(), controller.getTurnColor());
+            // controller.createNewGame();
+            // loadPosition(controller.getCurrentPosition());
+            // updateCounter(controller.getMoveCounter(), controller.getTurnColor());
+            gamePanel.setVisible(true);
         });
 
         currentMoveColor = new JLabel("1", JLabel.CENTER);
@@ -92,6 +100,46 @@ public class ChessView {
         }
 
         mainPanel.add(chessPanel, BorderLayout.CENTER);
+    }
+
+    private void createGameMenu(Container parent) {
+        final String pvp = "Player vs Player";
+        final String pvsf = "Player vs Stockfish";
+
+        var cards = new JPanel(new CardLayout());
+
+        var pvpCard = new JPanel();
+        var pvpButton = new JButton("Start game");
+        pvpButton.addActionListener((e) -> {
+            controller.createNewGame(GameMode.PlayerVsPlayer);
+            parent.setVisible(false);
+        });
+        pvpCard.add(pvpButton);
+
+        var pvsfCard = new JPanel();
+        var pvsfButton = new JButton("Start game");
+        pvsfButton.addActionListener((e) -> {
+            controller.createNewGame(GameMode.PlayerVsStockfish);
+            parent.setVisible(false);
+        });
+        pvsfCard.add(pvsfButton);
+
+        cards.add(pvpCard, pvp);
+        cards.add(pvsfCard, pvsf);
+
+        var comboBoxPane = new JPanel();
+        String comboBoxItems[] = {pvp, pvsf};
+
+        var cb = new JComboBox(comboBoxItems);
+        cb.setEditable(false);
+        cb.addItemListener((evt) -> {
+            var cl = (CardLayout)(cards.getLayout());
+            cl.show(cards, (String)evt.getItem());
+        });
+        comboBoxPane.add(cb);
+
+        parent.add(comboBoxPane, BorderLayout.PAGE_START);
+        parent.add(cards, BorderLayout.CENTER);
     }
 
     private void createImages() {

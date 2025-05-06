@@ -1,6 +1,7 @@
 package app.controller
 
 import app.model.ChessGame
+import app.model.GameMode
 import app.view.ChessView
 
 class ChessApp {
@@ -20,5 +21,5 @@ class ChessApp {
 
     fun makeMove(from: Pair<Int, Int>, to: Pair<Int, Int>) = chessGame.makeMove(from, to)
 
-    fun createNewGame() = chessGame.createNewGame()
+    fun createNewGame(mode: GameMode) = chessGame.createNewGame(mode)
 }

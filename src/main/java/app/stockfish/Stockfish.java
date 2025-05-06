@@ -86,6 +86,6 @@ public class Stockfish {
             System.exit(1);
         }
 
-        return "";
+        return "0000";
     }
 }

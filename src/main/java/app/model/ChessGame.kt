@@ -19,6 +19,8 @@ class ChessGame {
     private var lastCapture: Int = 0
     private var lastPawnMove: Int = 0
 
+    private var gameMode: GameMode = GameMode.PlayerVsPlayer
+
     private val moves: MutableList<String> = mutableListOf()
     private val stockfish: Stockfish = Stockfish("./stockfish-avx2")
 
@@ -26,7 +28,12 @@ class ChessGame {
         positions[currentPosition] = 1
     }
 
-    fun makeMove(from: Pair<Int, Int>, to: Pair<Int, Int>) {
+    fun makeMove(from: Pair<Int, Int>, to: Pair<Int, Int>, ai: Boolean = false) {
+        // Dont allow user move if playing against stockfish
+        if (turnColor == Color.BLACK && !ai) {
+            return
+        }
+
         if (gameState != GameState.RUNNING) {
             return
         }
@@ -35,39 +42,46 @@ class ChessGame {
             newPos = Position(currentPosition, lastMove)
         }
 
-        if (newPos!!.checkValidMove(from, to)) {
-            val pawnMoved = newPos?.getChessBoard()!![from.first][from.second]?.type == Piece.PAWN
-            val pieceCaptured = newPos?.getChessBoard()!![to.first][to.second] != null
-
-            if (pawnMoved) {
-                lastPawnMove = moveCounter
-            }
-
-            if (pieceCaptured) {
-                lastCapture = moveCounter
-            }
-
-            // Model
-            println("Valid move: $from -> $to")
-            newPos!!.makeMove(from, to)
-            println("From: $from -> $to")
-            currentPosition = newPos!!
-            newPos = null
-            lastMove = Pair(from, to)
-            updateCounterAndColor()
-            addAndCheckRepetition()
-            checkForCheckMate()
-            checkFiftyMoveRule()
-
-            // Stockfish
-            moves.add(toLongAlgebricNotation(from, to))
-            val move = stockfish.getMove(moves.joinToString(separator = " "))
-            val nextMove = fromLongAlgebraicNotation(move)
-            this.makeMove(nextMove.first, nextMove.second)
+        if (!newPos!!.checkValidMove(from, to)) {
+            println("Invalid move: $from -> $to")
             return
         }
 
-        println("Invalid move: $from -> $to")
+        val pawnMoved = newPos?.getChessBoard()!![from.first][from.second]?.type == Piece.PAWN
+        val pieceCaptured = newPos?.getChessBoard()!![to.first][to.second] != null
+
+        if (pawnMoved) {
+            lastPawnMove = moveCounter
+        }
+
+        if (pieceCaptured) {
+            lastCapture = moveCounter
+        }
+
+        // Model
+        println("Valid move: $from -> $to")
+        newPos!!.makeMove(from, to)
+        println("From: $from -> $to")
+        currentPosition = newPos!!
+        newPos = null
+        lastMove = Pair(from, to)
+        updateCounterAndColor()
+        addAndCheckRepetition()
+        checkForCheckMate()
+        checkFiftyMoveRule()
+
+        // Stockfish
+        if (gameMode == GameMode.PlayerVsStockfish) {
+            moves.add(toLongAlgebricNotation(from, to))
+            if (turnColor == Color.BLACK) {
+                val move = stockfish.getMove(moves.joinToString(separator = " "))
+                if (move == "0000") {
+                    return
+                }
+                val nextMove = fromLongAlgebraicNotation(move)
+                this.makeMove(nextMove.first, nextMove.second, true)
+            }
+        }
     }
 
 
@@ -125,7 +139,9 @@ class ChessGame {
     }
 
 
-    fun createNewGame() {
+    fun createNewGame(mode: GameMode) {
+        gameMode = mode
+        
         positions.clear()
         currentPosition = Position()
         newPos = null
