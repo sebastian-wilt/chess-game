@@ -78,7 +78,12 @@ class Position {
 
     // Move must be legal
     // use checkValidMove first
-    fun makeMove(from: Pair<Int, Int>, to: Pair<Int, Int>, simulation: Boolean = false) {
+    fun makeMove(move: String, simulation: Boolean = false) {
+        val movePair = fromLongAlgebraicNotation(move)
+        val from = movePair.first
+        val to = movePair.second
+
+        val isPromotion = move.length == 5
 
         val isPawnMoveToEmpty =
             chessboard[from.first][from.second]?.type == Piece.PAWN && chessboard[to.first][to.second] == null
@@ -113,12 +118,41 @@ class Position {
         chessboard[from.first][from.second] = null
         chessboard[to.first][to.second]?.move()
 
+        if (isPromotion) {
+            val piece = when (move[4]) {
+                'q' -> Piece.QUEEN
+                'r' -> Piece.ROOK
+                'b' -> Piece.BISHOP
+                'n' -> Piece.KNIGHT
+                else -> Piece.QUEEN
+            }
+
+            chessboard[to.first][to.second] = ChessPiece(piece, turnColor)
+        }
+
 
         if (!simulation) {
             chessboard.printReadable()
         }
 
         changeTurn()
+    }
+
+    private fun fromLongAlgebraicNotation(move: String): Pair<Pair<Int, Int>, Pair<Int, Int>> {
+        val fromCol = squares.indexOf(move[0])
+        val fromRow = 8 - move[1].toString().toInt()
+        val from = Pair(fromRow, fromCol)
+        val toCol = squares.indexOf(move[2])
+        val toRow = 8 - move[3].toString().toInt()
+        val to = Pair(toRow, toCol)
+
+        return Pair(from, to)
+    }
+
+    private fun toLongAlgebricNotation(from: Pair<Int, Int>, to: Pair<Int, Int>): String {
+        var src = squares[from.second] + (8 - from.first).toString()
+        var dest = squares[to.second] + (8 - to.first).toString()
+        return "$src$dest"
     }
 
     fun getChessBoard() = chessboard
@@ -432,7 +466,7 @@ class Position {
             println("Simulating move: $from -> $to")
         }
         val pos = Position(this, lastMove = null, findMoves = false)
-        pos.makeMove(from, to, true)
+        pos.makeMove(toLongAlgebricNotation(from, to), true)
         pos.findPossibleMoves(ignoreCheck = true)
         return !pos.isCheck
     }

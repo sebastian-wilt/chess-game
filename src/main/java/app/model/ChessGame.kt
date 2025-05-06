@@ -63,7 +63,7 @@ class ChessGame {
 
         // Model
         println("Valid move: $from -> $to")
-        newPos!!.makeMove(from, to)
+        newPos!!.makeMove(move)
         println("From: $from -> $to")
         currentPosition = newPos!!
         newPos = null
@@ -123,8 +123,6 @@ class ChessGame {
     private fun toLongAlgebricNotation(from: Pair<Int, Int>, to: Pair<Int, Int>): String {
         var src = squares[from.second] + (8 - from.first).toString()
         var dest = squares[to.second] + (8 - to.first).toString()
-        println("From: $from -> $to")
-        println("Move: $src$dest")
         return "$src$dest"
     }
     

@@ -25,8 +25,11 @@ public class ChessView {
     private JLabel currentMoveColor;
     private final JButton[][] chessBoardSquares = new JButton[8][8];
     private final ImageIcon defaultIcon = new ImageIcon(new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB));
-    private int counter = 0;
+
     private String promotionSuffix = "";
+    private volatile boolean waitForPromotion = false;
+
+    private int counter = 0;
     private final int[] moveFrom = new int[2];
     private final int[] moveTo = new int[2];
     private final HashMap<String, ImageIcon> images = new HashMap<>();
@@ -67,13 +70,7 @@ public class ChessView {
 
         JButton newGame = new JButton("New game");
         newGame.addActionListener((e) -> {
-            // gamePanel.setVisible(true);
-            var promotionPanel = new JFrame();
-            createPromotionPanel(promotionPanel);
-            promotionPanel.setAlwaysOnTop(true);
-            promotionPanel.pack();
-            promotionPanel.setLocationRelativeTo(null);
-            promotionPanel.setVisible(true);
+            gamePanel.setVisible(true);
         });
 
         currentMoveColor = new JLabel("1", JLabel.CENTER);
@@ -180,7 +177,7 @@ public class ChessView {
                 final PromotionButton b = (PromotionButton) (e.getSource());
                 promotionSuffix = b.suffix;
                 parent.dispose();
-                System.out.println(promotionSuffix);
+                waitForPromotion = false;
             });
 
             panel.add(button);
@@ -230,8 +227,47 @@ public class ChessView {
     private void makeMove() {
         counter = 0;
         var move = toLongAlgebricNotation(new Pair<>(moveFrom[0], moveFrom[1]), new Pair<>(moveTo[0], moveTo[1]));
-        new MoveThread(move).execute();
-        update();
+    
+        System.out.format("Move: %d %d -> %d %d\n", moveFrom[0], moveFrom[1], moveTo[0], moveTo[1]);
+        var wait = false;
+        if (controller.getTurnColor() == Color.WHITE) {
+            if (chessBoardSquares[moveFrom[0]][moveFrom[1]].getIcon() == images.get("WHITE_PAWN") && moveTo[0] == 0) {
+                var promotionPanel = new JFrame();
+                createPromotionPanel(promotionPanel);
+                promotionPanel.setAlwaysOnTop(true);
+                promotionPanel.pack();
+                promotionPanel.setLocationRelativeTo(null);
+                promotionPanel.setVisible(true);
+                waitForPromotion = true;
+                wait = true;
+            }
+        } else {
+            if (chessBoardSquares[moveFrom[0]][moveFrom[1]].getIcon() == images.get("BLACK_PAWN") && moveTo[0] == 7) {
+                var promotionPanel = new JFrame();
+                createPromotionPanel(promotionPanel);
+                promotionPanel.setAlwaysOnTop(true);
+                promotionPanel.pack();
+                promotionPanel.setLocationRelativeTo(null);
+                promotionPanel.setVisible(true);
+                waitForPromotion = true;
+                wait = true;
+            }
+        }
+
+        if (wait) {
+            while (waitForPromotion) {
+                try {
+                    Thread.sleep(100);
+                    System.out.println("Waiting");
+                } catch (InterruptedException e) {
+                }
+            }
+
+            move += promotionSuffix;
+        }
+
+        System.out.println("Making move: " + move);
+        controller.makeMove(move);
     }
 
     private String toLongAlgebricNotation(Pair<Integer, Integer> from, Pair<Integer, Integer> to) {
@@ -294,7 +330,9 @@ public class ChessView {
                     counter = 0;
                     return;
                 }
-                makeMove();
+
+                counter = 0;
+                new MoveThread().execute();
             }
         }
     }
@@ -329,15 +367,13 @@ public class ChessView {
     // Much processing, especially if playing against stockfish
     // So needs own thread
     class MoveThread extends SwingWorker {
-        private String move;
-
-        MoveThread(String move) {
-            this.move = move;
+        protected Object doInBackground() {
+            makeMove();
+            return null;
         }
 
-        protected Object doInBackground() {
-            controller.makeMove(move);
-            return null;
+        protected void done() {
+            update();
         }
     }
 
