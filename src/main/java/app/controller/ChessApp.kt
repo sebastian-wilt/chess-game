@@ -19,7 +19,7 @@ class ChessApp {
 
     fun getGameState() = chessGame.gameState
 
-    fun makeMove(from: Pair<Int, Int>, to: Pair<Int, Int>) = chessGame.makeMove(from, to)
+    fun makeMove(move: String) = chessGame.makeMove(move)
 
     fun createNewGame(mode: GameMode) = chessGame.createNewGame(mode)
 }

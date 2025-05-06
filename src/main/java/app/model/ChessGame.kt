@@ -7,7 +7,6 @@ import kotlin.math.max
 
 const val squares: String = "abcdefgh"
 
-
 class ChessGame {
     private val positions: MutableMap<Position, Int> = mutableMapOf()
     var currentPosition: Position = Position()
@@ -28,9 +27,9 @@ class ChessGame {
         positions[currentPosition] = 1
     }
 
-    fun makeMove(from: Pair<Int, Int>, to: Pair<Int, Int>, ai: Boolean = false) {
+    fun makeMove(move: String, ai: Boolean = false) {
         // Dont allow user move if playing against stockfish
-        if (turnColor == Color.BLACK && !ai) {
+        if (turnColor == Color.BLACK && !ai && gameMode == GameMode.PlayerVsStockfish) {
             return
         }
 
@@ -41,6 +40,10 @@ class ChessGame {
         if (newPos == null) {
             newPos = Position(currentPosition, lastMove)
         }
+
+        val movePair = fromLongAlgebraicNotation(move);
+        val from = movePair.first;
+        val to = movePair.second;
 
         if (!newPos!!.checkValidMove(from, to)) {
             println("Invalid move: $from -> $to")
@@ -72,14 +75,14 @@ class ChessGame {
 
         // Stockfish
         if (gameMode == GameMode.PlayerVsStockfish) {
-            moves.add(toLongAlgebricNotation(from, to))
+            moves.add(move)
             if (turnColor == Color.BLACK) {
                 val move = stockfish.getMove(moves.joinToString(separator = " "))
                 if (move == "0000") {
                     return
                 }
-                val nextMove = fromLongAlgebraicNotation(move)
-                this.makeMove(nextMove.first, nextMove.second, true)
+                val nextMove = move
+                this.makeMove(move, true)
             }
         }
     }

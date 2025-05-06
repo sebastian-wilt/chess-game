@@ -16,16 +16,20 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 
+
 public class ChessView {
+    private final String squares = "abcdefgh";
+
     private final ChessApp controller;
     private JPanel mainPanel;
     private JLabel currentMoveColor;
     private final JButton[][] chessBoardSquares = new JButton[8][8];
     private final ImageIcon defaultIcon = new ImageIcon(new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB));
     private int counter = 0;
+    private String promotionSuffix = "";
     private final int[] moveFrom = new int[2];
     private final int[] moveTo = new int[2];
-    private final HashMap<String, String> images = new HashMap<>();
+    private final HashMap<String, ImageIcon> images = new HashMap<>();
 
     public ChessView(ChessApp controller) {
         this.controller = controller;
@@ -60,12 +64,16 @@ public class ChessView {
         gamePanel.pack();
         gamePanel.setLocationRelativeTo(null);
 
+
         JButton newGame = new JButton("New game");
         newGame.addActionListener((e) -> {
-            // controller.createNewGame();
-            // loadPosition(controller.getCurrentPosition());
-            // updateCounter(controller.getMoveCounter(), controller.getTurnColor());
-            gamePanel.setVisible(true);
+            // gamePanel.setVisible(true);
+            var promotionPanel = new JFrame();
+            createPromotionPanel(promotionPanel);
+            promotionPanel.setAlwaysOnTop(true);
+            promotionPanel.pack();
+            promotionPanel.setLocationRelativeTo(null);
+            promotionPanel.setVisible(true);
         });
 
         currentMoveColor = new JLabel("1", JLabel.CENTER);
@@ -112,6 +120,8 @@ public class ChessView {
         var pvpButton = new JButton("Start game");
         pvpButton.addActionListener((e) -> {
             controller.createNewGame(GameMode.PlayerVsPlayer);
+            loadPosition(controller.getCurrentPosition());
+            updateCounter(controller.getMoveCounter(), controller.getTurnColor());
             parent.setVisible(false);
         });
         pvpCard.add(pvpButton);
@@ -120,6 +130,8 @@ public class ChessView {
         var pvsfButton = new JButton("Start game");
         pvsfButton.addActionListener((e) -> {
             controller.createNewGame(GameMode.PlayerVsStockfish);
+            loadPosition(controller.getCurrentPosition());
+            updateCounter(controller.getMoveCounter(), controller.getTurnColor());
             parent.setVisible(false);
         });
         pvsfCard.add(pvsfButton);
@@ -142,19 +154,66 @@ public class ChessView {
         parent.add(cards, BorderLayout.CENTER);
     }
 
+    private void createPromotionPanel(JFrame parent) {
+        // Q R B N 
+        var panel = new JPanel();
+
+        String suffixes = "qrbn";
+
+        String prefix;
+        String pieces[] = {"_QUEEN", "_ROOK", "_BISHOP", "_KNIGHT"};
+        var turnColor = controller.getTurnColor();
+        
+        if (turnColor == Color.WHITE) {
+            prefix = "WHITE";
+        } else {
+            prefix = "BLACK";
+        }
+
+        for (int i = 0; i < pieces.length; i++) {
+            var suffix = String.valueOf(suffixes.charAt(i));
+            var button = new PromotionButton(suffix);
+            var icon = images.get(prefix + pieces[i]);
+            button.setIcon(icon);
+
+            button.addActionListener((e) -> {
+                final PromotionButton b = (PromotionButton) (e.getSource());
+                promotionSuffix = b.suffix;
+                parent.dispose();
+                System.out.println(promotionSuffix);
+            });
+
+            panel.add(button);
+        }
+
+        parent.add(panel);
+    }
+
     private void createImages() {
-        images.put("BLACK_KING", "assets/black_king.png");
-        images.put("BLACK_PAWN", "assets/black_pawn.png");
-        images.put("BLACK_QUEEN", "assets/black_queen.png");
-        images.put("BLACK_ROOK", "assets/black_rook.png");
-        images.put("BLACK_KNIGHT", "assets/black_knight.png");
-        images.put("BLACK_BISHOP", "assets/black_bishop.png");
-        images.put("WHITE_KING", "assets/white_king.png");
-        images.put("WHITE_PAWN", "assets/white_pawn.png");
-        images.put("WHITE_QUEEN", "assets/white_queen.png");
-        images.put("WHITE_ROOK", "assets/white_rook.png");
-        images.put("WHITE_KNIGHT", "assets/white_knight.png");
-        images.put("WHITE_BISHOP", "assets/white_bishop.png");
+        images.put("BLACK_KING", readIcon("assets/black_king.png"));
+        images.put("BLACK_PAWN", readIcon("assets/black_pawn.png"));
+        images.put("BLACK_QUEEN", readIcon("assets/black_queen.png"));
+        images.put("BLACK_ROOK", readIcon("assets/black_rook.png"));
+        images.put("BLACK_KNIGHT", readIcon("assets/black_knight.png"));
+        images.put("BLACK_BISHOP", readIcon("assets/black_bishop.png"));
+        images.put("WHITE_KING", readIcon("assets/white_king.png"));
+        images.put("WHITE_PAWN", readIcon("assets/white_pawn.png"));
+        images.put("WHITE_QUEEN", readIcon("assets/white_queen.png"));
+        images.put("WHITE_ROOK", readIcon("assets/white_rook.png"));
+        images.put("WHITE_KNIGHT", readIcon("assets/white_knight.png"));
+        images.put("WHITE_BISHOP", readIcon("assets/white_bishop.png"));
+    }
+
+    private ImageIcon readIcon(String suffix) {
+        String path = "./src/main/java/app/" + suffix;
+        try {
+            return new ImageIcon(ImageIO.read(new File(path)));
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        return null;
     }
 
     private void loadPosition(Position position) {
@@ -162,19 +221,7 @@ public class ChessView {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 var string = board[i][j] == null ? null : board[i][j].toString();
-                var path = images.getOrDefault(string, null);
-                ImageIcon icon;
-                if (path != null) {
-                    try {
-                        var file = new File("./src/main/java/app/" + path);
-                        icon = new ImageIcon(ImageIO.read(file));
-                    } catch (Exception e) {
-                        icon = null;
-                    }
-                } else {
-                    icon = defaultIcon;
-                }
-
+                var icon = images.getOrDefault(string, defaultIcon);
                 chessBoardSquares[i][j].setIcon(icon);
             }
         }
@@ -182,8 +229,15 @@ public class ChessView {
 
     private void makeMove() {
         counter = 0;
-        new MoveThread(new Pair<>(moveFrom[0], moveFrom[1]), new Pair<>(moveTo[0], moveTo[1])).execute();
+        var move = toLongAlgebricNotation(new Pair<>(moveFrom[0], moveFrom[1]), new Pair<>(moveTo[0], moveTo[1]));
+        new MoveThread(move).execute();
         update();
+    }
+
+    private String toLongAlgebricNotation(Pair<Integer, Integer> from, Pair<Integer, Integer> to) {
+        var src = squares.charAt(from.getSecond()) + Integer.toString((8 - from.getFirst()));
+        var dest = squares.charAt(to.getSecond()) + Integer.toString((8 - to.getFirst()));
+        return String.format("%s%s", src, dest);
     }
 
     private void update() {
@@ -245,6 +299,14 @@ public class ChessView {
         }
     }
 
+    class PromotionButton extends JButton {
+        String suffix;
+        
+        PromotionButton(String suffix) {
+            this.suffix = suffix;
+        }
+    }
+
     // Thread triggering update every second
     class UpdateThread extends SwingWorker {
         protected Object doInBackground() {
@@ -267,15 +329,14 @@ public class ChessView {
     // Much processing, especially if playing against stockfish
     // So needs own thread
     class MoveThread extends SwingWorker {
-        private Pair<Integer, Integer> from, to;
+        private String move;
 
-        MoveThread(Pair<Integer, Integer> from, Pair<Integer, Integer> to) {
-            this.from = from;
-            this.to = to;
+        MoveThread(String move) {
+            this.move = move;
         }
 
         protected Object doInBackground() {
-            controller.makeMove(from, to);
+            controller.makeMove(move);
             return null;
         }
     }
