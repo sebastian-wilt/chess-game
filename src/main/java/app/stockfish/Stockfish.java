@@ -53,6 +53,20 @@ public class Stockfish {
             e.printStackTrace();
             System.exit(1);
         }
+
+        // Decide number of threads
+        var threads = Runtime.getRuntime().availableProcessors();
+        try {
+            output.write(String.format("setoption name Threads value %d\n", threads / 2));
+            output.flush();
+            System.out.println(String.format("setoption name Threads value %d", threads / 2));
+            while (!input.ready());
+            var msg = input.readLine();
+            System.out.println(msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 
     public String getMove(String moves) {
@@ -87,5 +101,21 @@ public class Stockfish {
         }
 
         return "0000";
+    }
+
+    public void newGame(int strength) {
+        try {
+            output.write("ucinewgame\n");
+            output.write("setoption name UCI_Limitstrength value true\n");
+            output.write(String.format("setoption name UCI_Elo value %d\n", strength));
+            output.write("isready\n");
+            output.flush();
+            while (!input.ready());
+            var msg = input.readLine();
+            System.out.println(msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 }

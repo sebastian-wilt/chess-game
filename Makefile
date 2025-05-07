@@ -6,7 +6,7 @@ all:
 	./gradlew jar
 
 run: all
-	kotlin -cp build/libs/Chess-$(CURRENT_VERSION).jar app.Main
+	kotlin -J-ea -cp build/libs/Chess-$(CURRENT_VERSION).jar app.Main
 
 clean: 
 	./gradlew clean

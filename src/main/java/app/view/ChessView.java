@@ -4,6 +4,8 @@ import app.controller.ChessApp;
 import app.model.GameState;
 import app.model.Position;
 import app.model.GameMode;
+import app.model.PlayerVsPlayer;
+import app.model.PlayerVsStockfish;
 import kotlin.Pair;
 
 import javax.imageio.ImageIO;
@@ -113,20 +115,37 @@ public class ChessView {
 
         var cards = new JPanel(new CardLayout());
 
+        // Player vs player
         var pvpCard = new JPanel();
         var pvpButton = new JButton("Start game");
         pvpButton.addActionListener((e) -> {
-            controller.createNewGame(GameMode.PlayerVsPlayer);
+            controller.createNewGame(PlayerVsPlayer.INSTANCE);
             loadPosition(controller.getCurrentPosition());
             updateCounter(controller.getMoveCounter(), controller.getTurnColor());
             parent.setVisible(false);
         });
         pvpCard.add(pvpButton);
 
-        var pvsfCard = new JPanel();
+        // Player vs stockfish
+        var pvsfCard = new JPanel(new GridLayout(3, 1, 10, 10));
+
+        // Select difficulty
+        var defaultDifficulty = 2200;
+        var difficultyLabel = new JLabel(String.valueOf(defaultDifficulty), JLabel.CENTER);
+        pvsfCard.add(difficultyLabel);
+
+        var difficultySlider = new JSlider(1320, 3190, defaultDifficulty);
+        difficultySlider.setMajorTickSpacing(200);
+        difficultySlider.setPaintTicks(true);
+        difficultySlider.addChangeListener((evt) -> {
+            var value = difficultySlider.getValue();
+            difficultyLabel.setText(String.valueOf(value));
+        });
+        pvsfCard.add(difficultySlider);
+
         var pvsfButton = new JButton("Start game");
         pvsfButton.addActionListener((e) -> {
-            controller.createNewGame(GameMode.PlayerVsStockfish);
+            controller.createNewGame(new PlayerVsStockfish(difficultySlider.getValue()));
             loadPosition(controller.getCurrentPosition());
             updateCounter(controller.getMoveCounter(), controller.getTurnColor());
             parent.setVisible(false);

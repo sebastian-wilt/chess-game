@@ -18,7 +18,7 @@ class ChessGame {
     private var lastCapture: Int = 0
     private var lastPawnMove: Int = 0
 
-    private var gameMode: GameMode = GameMode.PlayerVsPlayer
+    private var gameMode: GameMode = PlayerVsPlayer
 
     private val moves: MutableList<String> = mutableListOf()
     private val stockfish: Stockfish = Stockfish("./stockfish-avx2")
@@ -29,7 +29,7 @@ class ChessGame {
 
     fun makeMove(move: String, ai: Boolean = false) {
         // Dont allow user move if playing against stockfish
-        if (turnColor == Color.BLACK && !ai && gameMode == GameMode.PlayerVsStockfish) {
+        if (turnColor == Color.BLACK && !ai && gameMode.getMode() == Mode.PvSF) {
             return
         }
 
@@ -74,7 +74,7 @@ class ChessGame {
         checkFiftyMoveRule()
 
         // Stockfish
-        if (gameMode == GameMode.PlayerVsStockfish) {
+        if (gameMode.getMode() == Mode.PvSF) {
             moves.add(move)
             if (turnColor == Color.BLACK) {
                 val move = stockfish.getMove(moves.joinToString(separator = " "))
@@ -142,6 +142,10 @@ class ChessGame {
 
     fun createNewGame(mode: GameMode) {
         gameMode = mode
+
+        if (mode is PlayerVsStockfish) {
+            stockfish.newGame(mode.rating)
+        }
         
         positions.clear()
         currentPosition = Position()
