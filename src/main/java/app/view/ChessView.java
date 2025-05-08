@@ -22,6 +22,8 @@ import java.util.HashMap;
 public class ChessView {
     private final String squares = "abcdefgh";
 
+    private boolean flipped = false;
+
     private final ChessApp controller;
     private JPanel mainPanel;
     private JLabel currentMoveColor;
@@ -78,12 +80,18 @@ public class ChessView {
         currentMoveColor = new JLabel("1", JLabel.CENTER);
         currentMoveColor.setOpaque(true);
 
+        var flipBoard  = new JButton("Flip board");
+        flipBoard.addActionListener((e) -> {
+            flipped = !flipped;
+        });
+
         JButton exitButton = new JButton("Exit");
         exitButton.addActionListener((e) -> System.exit(0));
 
         mainPanel.add(menuPanel, BorderLayout.NORTH);
         menuPanel.add(newGame);
         menuPanel.add(currentMoveColor);
+        menuPanel.add(flipBoard);
         menuPanel.add(exitButton);
     }
 
@@ -233,6 +241,14 @@ public class ChessView {
     }
 
     private void loadPosition(Position position) {
+        if (flipped) {
+            loadFlippedPosition(position);
+        } else {
+            loadNormalPosition(position);
+        }
+    }
+
+    private void loadNormalPosition(Position position) {
         var board = position.getChessBoard();
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -241,6 +257,24 @@ public class ChessView {
                 chessBoardSquares[i][j].setIcon(icon);
             }
         }
+    }
+    
+    private void loadFlippedPosition(Position position) {
+        var board = position.getChessBoard();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                var string = board[i][j] == null ? null : board[i][j].toString();
+                var icon = images.getOrDefault(string, defaultIcon);
+                var coords = translateCoordinates(i, j);
+                chessBoardSquares[coords.getFirst()][coords.getSecond()].setIcon(icon);
+            }
+        }
+    }
+
+    private Pair<Integer, Integer> translateCoordinates(int y, int x) {
+        var a = 7 - y; 
+        var b = 7 - x;
+        return new Pair(a, b);
     }
 
     private void makeMove() {
@@ -326,14 +360,24 @@ public class ChessView {
     }
 
     class ChessButton implements ActionListener {
-        final int row, col;
+        final int i, j;
+        int row, col;
 
         public ChessButton(int i, int j) {
-            row = i;
-            col = j;
+            this.i = i;
+            this.j = j;
         }
 
         public void actionPerformed(ActionEvent e) {
+            if (flipped) {
+                var coords = translateCoordinates(i, j);
+                row = coords.getFirst();
+                col = coords.getSecond();
+            } else {
+                row = i;
+                col = j;
+            }
+
             JButton button = (JButton) e.getSource();
             if (counter == 0) {
                 if (button.getIcon() == defaultIcon) {
