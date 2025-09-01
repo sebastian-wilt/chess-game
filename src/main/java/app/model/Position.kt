@@ -130,11 +130,6 @@ class Position {
             chessboard[to.first][to.second] = ChessPiece(piece, turnColor)
         }
 
-
-        if (!simulation) {
-            chessboard.printReadable()
-        }
-
         changeTurn()
     }
 
@@ -184,10 +179,6 @@ class Position {
                 }
             }
         }
-
-        if (!ignoreCheck) {
-            printValidMoves()
-        }
     }
 
     private fun findKnightMoves(row: Int, col: Int, ignoreCheck: Boolean = false) {
@@ -212,10 +203,7 @@ class Position {
     }
 
     private fun findKingMoves(row: Int, col: Int, ignoreCheck: Boolean = false) {
-        if (!ignoreCheck && printDebug) {
-            println("Checking king moves for ($row, $col)")
-        }
-
+        // Check 3x3 around king
         for (i in (-1..1)) {
             for (j in (-1..1)) {
                 if (i == 0 && j == 0) {
@@ -229,7 +217,7 @@ class Position {
         }
 
         // Castling
-
+        
         if (chessboard[row][col]!!.hasMoved()) {
             return
         }
@@ -262,10 +250,6 @@ class Position {
     }
 
     private fun findBishopMoves(row: Int, col: Int, ignoreCheck: Boolean = false) {
-        if (!ignoreCheck && printDebug) {
-            println("Checking bishop moves for ($row, $col)")
-        }
-
         val opposition = if (turnColor == Color.WHITE) Color.BLACK else Color.WHITE
 
         // Move down right
@@ -325,10 +309,6 @@ class Position {
     }
 
     private fun findRookMoves(row: Int, col: Int, ignoreCheck: Boolean = false) {
-        if (!ignoreCheck && printDebug) {
-            println("Checking rook moves for ($row, $col)")
-        }
-
         val opposition = if (turnColor == Color.WHITE) Color.BLACK else Color.WHITE
 
         // Move down
@@ -389,10 +369,6 @@ class Position {
     }
 
     private fun findPawnMoves(row: Int, col: Int, ignoreCheck: Boolean = false) {
-        if (!ignoreCheck && printDebug) {
-            println("Checking pawn moves for ($row, $col)")
-        }
-
         val opposition = if (turnColor == Color.WHITE) Color.BLACK else Color.WHITE
         val direction = if (turnColor == Color.WHITE) -1 else 1
         val pawn = chessboard[row][col]!!
@@ -423,8 +399,6 @@ class Position {
 
         val lastFrom = lastMove?.first ?: return
         val lastTo = lastMove.second
-
-        println("\n\nLast Move: $lastFrom -> $lastTo")
 
         // Check en passant
         if (abs(lastTo.first - lastFrom.first) == 2 && chessboard[lastTo.first][lastTo.second]?.type == Piece.PAWN) {
@@ -462,9 +436,6 @@ class Position {
     // Check if move would put own king in check
     // Returns true if legal move
     private fun simulateMove(from: Pair<Int, Int>, to: Pair<Int, Int>): Boolean {
-        if (printDebug) {
-            println("Simulating move: $from -> $to")
-        }
         val pos = Position(this, lastMove = null, findMoves = false)
         pos.makeMove(toLongAlgebricNotation(from, to), true)
         pos.findPossibleMoves(ignoreCheck = true)

@@ -47,7 +47,6 @@ public class Stockfish {
             String msg;
             do {
                 msg = input.readLine();
-                System.out.println(msg);
             } while (!msg.equals("uciok"));
         } catch (IOException e) {
             e.printStackTrace();
@@ -59,10 +58,8 @@ public class Stockfish {
         try {
             output.write(String.format("setoption name Threads value %d\n", threads / 2));
             output.flush();
-            System.out.println(String.format("setoption name Threads value %d", threads / 2));
             while (!input.ready());
             var msg = input.readLine();
-            System.out.println(msg);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -85,11 +82,9 @@ public class Stockfish {
             String msg;
             do {
                 msg = input.readLine();
-                System.out.println(msg);
             } while (!msg.startsWith("bestmove"));
 
             var parts = msg.split(" ");
-            System.out.format("Stockfish best move: %s\n", parts[1]);
                 
             return parts[1];
         } catch (IOException e) {
@@ -112,7 +107,6 @@ public class Stockfish {
             output.flush();
             while (!input.ready());
             var msg = input.readLine();
-            System.out.println(msg);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);

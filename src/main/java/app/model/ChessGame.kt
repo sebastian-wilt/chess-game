@@ -47,7 +47,6 @@ class ChessGame {
         val to = movePair.second;
 
         if (!newPos!!.checkValidMove(from, to)) {
-            println("Invalid move: $from -> $to")
             return
         }
 
@@ -63,9 +62,7 @@ class ChessGame {
         }
 
         // Model
-        println("Valid move: $from -> $to")
         newPos!!.makeMove(move)
-        println("From: $from -> $to")
         currentPosition = newPos!!
         newPos = null
         lastMove = Pair(from, to)
@@ -108,11 +105,9 @@ class ChessGame {
     private fun addAndCheckRepetition() {
         val old = positions.getOrDefault(currentPosition, 0)
         positions[currentPosition] = old + 1
-        println("New repetition counter: ${positions[currentPosition]}")
         if (positions[currentPosition] == 3) {
             gameState = GameState.DRAW
         }
-        println("Gamestate: $gameState")
     }
 
     private fun checkFiftyMoveRule() {
@@ -134,8 +129,6 @@ class ChessGame {
         val toCol = squares.indexOf(move[2])
         val toRow = 8 - move[3].toString().toInt()
         val to = Pair(toRow, toCol)
-
-        println("From: $from -> $to")
 
         return Pair(from, to)
     }

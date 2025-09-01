@@ -281,7 +281,6 @@ public class ChessView {
         counter = 0;
         var move = toLongAlgebricNotation(new Pair<>(moveFrom[0], moveFrom[1]), new Pair<>(moveTo[0], moveTo[1]));
     
-        System.out.format("Move: %d %d -> %d %d\n", moveFrom[0], moveFrom[1], moveTo[0], moveTo[1]);
         var wait = false;
         if (controller.getTurnColor() == Color.WHITE) {
             if (chessBoardSquares[moveFrom[0]][moveFrom[1]].getIcon() == images.get("WHITE_PAWN") && moveTo[0] == 0) {
@@ -311,7 +310,6 @@ public class ChessView {
             while (waitForPromotion) {
                 try {
                     Thread.sleep(100);
-                    System.out.println("Waiting");
                 } catch (InterruptedException e) {
                 }
             }
@@ -319,7 +317,6 @@ public class ChessView {
             move += promotionSuffix;
         }
 
-        System.out.println("Making move: " + move);
         controller.makeMove(move);
     }
 
@@ -420,7 +417,6 @@ public class ChessView {
         }
 
         protected void done() {
-            System.out.println("Update thread done");
             update();
             createUpdateThread();
         }
