@@ -27,6 +27,7 @@ class ChessGame {
         positions[currentPosition] = 1
     }
 
+    @Synchronized
     fun makeMove(move: String, ai: Boolean = false) {
         // Dont allow user move if playing against stockfish
         if (turnColor == Color.BLACK && !ai && gameMode.getMode() == Mode.PvSF) {
